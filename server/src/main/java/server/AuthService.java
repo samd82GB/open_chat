@@ -10,5 +10,11 @@ public interface AuthService {
 
     String getNicknameByLoginAndPassword(String login, String password);
 
+    /**
+     * Попытка регистрации
+     *
+     * **/
+
+    boolean registration (String login, String password, String nickname);
 
 }
