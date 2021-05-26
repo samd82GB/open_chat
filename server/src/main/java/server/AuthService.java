@@ -17,4 +17,8 @@ public interface AuthService {
 
     boolean registration (String login, String password, String nickname);
 
+    //метод измненения ника
+    boolean changeNick (String oldNickName, String NewNickName);
+
+
 }

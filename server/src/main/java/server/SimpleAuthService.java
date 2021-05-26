@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleAuthService implements AuthService{
-    private class UserData {
+    private class UserData {    //вложенный класс для создания типа данных пользователя
         String login;
         String password;
         String nickname;
@@ -20,7 +20,7 @@ public class SimpleAuthService implements AuthService{
     private List<UserData> users;
 //этим методом создаём пользователей с именами и паролями
     public SimpleAuthService(){
-        users=new ArrayList<>();
+        users=new ArrayList<>(); //лист пользователей, в который добавляем данные пользователей типа UserData
         users.add(new UserData("qwe", "qwe", "qwe"));
         users.add(new UserData("asd", "asd", "asd"));
         users.add(new UserData("zxc", "zxc", "zxc"));
@@ -53,5 +53,10 @@ public class SimpleAuthService implements AuthService{
 
         users.add(new UserData(login, password, nickname));
         return true;
+    }
+
+    @Override
+    public boolean changeNick(String oldNickName, String NewNickName) {
+        return false;
     }
 }

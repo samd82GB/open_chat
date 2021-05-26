@@ -41,10 +41,10 @@ public class ClientHandler {
                             }
                            String newNick = server
                                     .getAuthService()
-                                    .getNicknameByLoginAndPassword(token[1], token[2]);
+                                    .getNicknameByLoginAndPassword(token[1], token[2]);//возвращаем никнейм по логину и паролю
                             if (newNick != null) {
                                 login = token[1];
-                                //если пользователь уже авторизован, то не даём ещё одном пользователю зайти под таким же именем
+                                //если пользователь уже авторизован, то не даём ещё одному пользователю зайти под таким же именем
                                 if (!server.isLoginAuthenticated(login)) {
                                     nickname = newNick;
                                     sendMsg("/auth_ok " + nickname);
@@ -96,6 +96,30 @@ public class ClientHandler {
                             if (str.startsWith("/w")) {
                                 String[] individMsg = str.split("\\s+", 3); //запись в массив строк после разделения по пробелам
                                 server.indMsg(this, individMsg[1], individMsg[2]);
+                            }
+
+                            //изменение имени пользователя
+
+                            if (str.startsWith("/cnn")) { //если входящие данные начинаются с /cnn, то это запрос на изменение имени пользователя
+                                String[] token = str.split("\\s+", 2); // запись в массив двух слов (старого и нового имени)
+                                if (token.length<2) {
+                                    continue;
+                                }
+                            if (token[1].contains(" ")) {   //если новое имя содержит пробел, то сообщаем, что такое имя недопустимо и идём дальше
+                                sendMsg("Имя не может содержать пробелов");
+                            continue;
+                            }
+
+                            if (server.getAuthService().changeNick(this.nickname, token[1])) { //вызываем метод изменения имени, старое имя текущее, новое из массива
+                                sendMsg("/ynnis "+token[1]);  //отправляем клиенту /ynnis и новое имя, если удачно заменили имя пользователя
+                                sendMsg("Ваше имя пользователя изменено на "+token[1]);
+                                this.nickname = token[1];
+                                server.broadcastClientList();
+
+                            } else {
+                                sendMsg("Не удалось изменит имя пользователя. Имя "+token[1] + " уже существует");
+                            }
+
                             }
 
                         } else {

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.*;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -18,9 +19,20 @@ public class Server {
     private List<ClientHandler> clients;
     private AuthService authService;
 
+
     public Server() {
         clients = new CopyOnWriteArrayList<>(); //создаём новый лист клиентов потокобезопасный
-        authService = new SimpleAuthService();
+       /* authService = new SimpleAuthService();*/
+
+
+        //проверка на соединение с базой данных
+        if (!SQLHandler.connect()) {
+            throw new RuntimeException("Не удалось подключиться к базе данных!");
+        }
+        // работа с пользователями через базу данных
+        authService = new DBauthService();
+
+
         try {
             server = new ServerSocket(PORT);
             System.out.println("Сервер запустился");
@@ -35,6 +47,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            SQLHandler.disconnect();      //закрываем соединение с базой данных
             try {
                 socket.close();
             } catch (IOException e) {

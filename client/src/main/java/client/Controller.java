@@ -139,6 +139,15 @@ public class Controller implements Initializable {
                                     }
                                 });
                             }
+
+                            //входящее сообщение с новым именем после изменения
+                            if (str.startsWith("/ynnis")) {
+                                nickname = str.split(" ")[1]; //записываем новое имя пользователя
+                                setTittle(nickname);                //установка в заголовок нового имени пользователя
+                            }
+
+
+
                         } else {
                             textArea.appendText(str + "\n");
                         }
@@ -241,6 +250,17 @@ public class Controller implements Initializable {
         String msg = String.format("/reg %s %s %s", login, password, nickname);
         try {
             out.writeUTF(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    //метод для автоматической отправки запроса на изменение имени пользователя
+    @FXML
+    public void sendMsgCNN() {
+        try {
+            out.writeUTF("/cnn " + textField.getText());
+            textField.clear();
+            textField.requestFocus();
         } catch (IOException e) {
             e.printStackTrace();
         }
