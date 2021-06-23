@@ -43,6 +43,8 @@ public class Controller implements Initializable {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
+    private History history;
+
 
     private final String IP_ADDRESS = "localhost";
     private final int PORT = 8189;
@@ -52,6 +54,7 @@ public class Controller implements Initializable {
     private Stage stage;
     private Stage regStage;
     private RegController regController;
+
 
     public void setAuthenticated (boolean authenticated){
         this.authenticated=authenticated;
@@ -64,6 +67,7 @@ public class Controller implements Initializable {
 
         if (!authenticated){  //если нет аутентификации, то стираем имя
             nickname="";
+            History.closeFile(); //закрываем поток данных в файл
         }
         setTittle(nickname);
     }
@@ -80,6 +84,7 @@ public class Controller implements Initializable {
                 if (socket != null && !socket.isClosed()){ //если сокет не пустой или не закрытый, то отправляем серверу /end
                     try {
                         out.writeUTF("/end");
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -96,6 +101,7 @@ public class Controller implements Initializable {
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
+
             new Thread(() -> {
                 try {
                     //цикл авторизации
@@ -104,23 +110,45 @@ public class Controller implements Initializable {
                         if (str.startsWith("/")){
                             if (str.equals("/end")) {
                                 System.out.println("Клиент: " + socket.getLocalSocketAddress()+"   отключился");
+
                                 break;
                             }
+                            //авторизация подтверждена
                             if(str.startsWith("/auth_ok")){
-                                nickname = str.split("\\s+")[1];
+                                nickname = str.split("\\s+")[1]; //получение ника \\s+ - поиск разделителей
+                                                                        //в виде пробела, или нескольких пробелов
                                 setAuthenticated(true);
+
+                                // вызваем метод для создания нового файла при удачной авторизации
+                               History.createFile(nickname);
+
+                              // получаем 100 сток из файла истории пользователя и выводим в текстовую зону чата
+                               String [] strings = History.readLinesToArray(nickname);  //получаем массив строк из файла
+                                int startPos = 0;
+                                if (strings.length >100) {   //если в массиве более 100 членов, то стартовая позиция считывания длина массива - 100
+                                    startPos = strings.length - 100;
+                                   }
+                                for (int i = startPos; i <strings.length; i++) {
+                                    textArea.appendText(strings[i] + "\n");
+                                }
+
                                 break;
-                            }
+
+                            }textArea.appendText(str + "\n");
+
                             if(str.startsWith("/reg_ok")) {
                                 regController.showResult("/reg_ok");
                             }
                             if(str.startsWith("/reg_no")) {
                                 regController.showResult("/reg_no");
                             }
+
+                            //если не начианется на /, то просто отправляем в текстовое поле
                         } else {
                             textArea.appendText(str + "\n");
+
                         }
-                      }
+                    }
 
                     //цикл работы
                     while (authenticated) {
@@ -147,17 +175,23 @@ public class Controller implements Initializable {
                             }
 
 
-
+                            //      здесь добавляем текст сообщения от сервера в текстовое поле если он не начинается на /
                         } else {
                             textArea.appendText(str + "\n");
+                            // добавляем текст в файл истории пользователя
+                            History.writeToFile(str + "\n");
+
                         }
 
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
+                    System.out.println("Отключение");
+                    setAuthenticated(false);
                     try {
                         socket.close();
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -170,10 +204,15 @@ public class Controller implements Initializable {
 
     }
 
+    //метод вызывается из окна клиента при отправлении сообщения
+    // берём текст из текстового поля и отправляем в исходящий поток out
+    //
     @FXML
     public void sendMsg() {
+
         try {
             out.writeUTF(textField.getText());
+
             textField.clear();
             textField.requestFocus();
         } catch (IOException e) {
