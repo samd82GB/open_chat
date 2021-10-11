@@ -10,7 +10,7 @@ public class SQLHandler {
     private static PreparedStatement psRegistration;
     private static PreparedStatement psChangeNick;                                    //подготовка данных для обмена с базой
 
-    public static boolean connect () {                                             //метод установки соединения с базой данных
+    public static boolean connect() {                                             //метод установки соединения с базой данных
         try {
             Class.forName("org.sqlite.JDBC");                                      //указываем адрес драйвера базы данных
             connection = DriverManager.getConnection("jdbc:sqlite:maindb.db"); //указываем к какой базе данных подключиться
@@ -21,7 +21,8 @@ public class SQLHandler {
             return false;
         }
     }
-//подготовка всех видов запросов в базу данных
+
+    //подготовка всех видов запросов в базу данных
     //запроса на получение имени по логину и паролю,
     //запроса на регистрацию нового пользователя,
     //запроса на изменение ника
@@ -32,8 +33,8 @@ public class SQLHandler {
 
     }
 
-//получение имени по логину и паролю
-    public static String getNicknameByLoginAndPassword (String login, String password) {
+    //получение имени по логину и паролю
+    public static String getNicknameByLoginAndPassword(String login, String password) {
 
         String nickName = "";
         try {
@@ -51,7 +52,7 @@ public class SQLHandler {
     }
 
     //регистрация нового пользователя
-    public static boolean registration (String login, String password, String nickname) {
+    public static boolean registration(String login, String password, String nickname) {
         try {
             psRegistration.setString(1, nickname);  //записываем в запрос имя
             psRegistration.setString(2, login);     //записываем в запрос логин
@@ -65,8 +66,8 @@ public class SQLHandler {
 
     }
 
-//измненение имени пользователя
-    public static boolean changeNick (String oldNickName, String newNickName) {
+    //измненение имени пользователя
+    public static boolean changeNick(String oldNickName, String newNickName) {
         try {
             psChangeNick.setString(1, newNickName); //записываем в запрос новое имя для обновления в базе данных
             psChangeNick.setString(2, oldNickName); //записываем в запрос старое имя для поиска по базе данных
@@ -80,30 +81,18 @@ public class SQLHandler {
     }
 
 
-
-         public static void disconnect () {
-             try {
-                 psGetNickName.close();
-                 psChangeNick.close();
-                 psRegistration.close();
-                 connection.close();
-             } catch (SQLException throwables) {
-                 throwables.printStackTrace();
-             }
-
+    public static void disconnect() {
+        try {
+            psGetNickName.close();
+            psChangeNick.close();
+            psRegistration.close();
+            connection.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
 
 
     }
-
-
-
-
-
-
-
-
-
-
 
 
 }

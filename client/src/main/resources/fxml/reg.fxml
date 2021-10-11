@@ -7,21 +7,19 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ListView?>
 <VBox fx:controller="client.RegController"
-      xmlns:fx="http://javafx.com/fxml" alignment="center" >
+      xmlns:fx="http://javafx.com/fxml" alignment="center">
 
-<stylesheets>
-    <URL value =  "@/css/style.css"/>
-</stylesheets>
+    <stylesheets>
+        <URL value="@/css/style.css"/>
+    </stylesheets>
 
-        <TextField fx:id="loginField"  promptText="login" />
-        <PasswordField fx:id = "passwordField"  promptText="password"/>
-        <TextField fx:id="nickField"  promptText="nickName" />
-        <Button text="login" minWidth="100"/>
-        <TextArea fx:id="textArea" VBox.vgrow="ALWAYS"/>
+    <TextField fx:id="loginField" promptText="login"/>
+    <PasswordField fx:id="passwordField" promptText="password"/>
+    <TextField fx:id="nickField" promptText="nickName"/>
+    <Button text="login" minWidth="100"/>
+    <TextArea fx:id="textArea" VBox.vgrow="ALWAYS"/>
 
-        <Button text="Регистрация" minWidth="100" onAction="#tryToReg"/>
-
-
+    <Button text="Регистрация" minWidth="100" onAction="#tryToReg"/>
 
 
 </VBox>

@@ -29,8 +29,8 @@ public class RegController {
 
     }
 
-    public void showResult(String result){
-        if (result.equals("/reg_ok")){
+    public void showResult(String result) {
+        if (result.equals("/reg_ok")) {
             textArea.appendText("Регистрация прошла успешно! \n");
         } else {
             textArea.appendText("Регистрация не удалась! \nВозможно логин и ник уже используются.\n ");

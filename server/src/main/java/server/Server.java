@@ -22,7 +22,7 @@ public class Server {
 
     public Server() {
         clients = new CopyOnWriteArrayList<>(); //создаём новый лист клиентов потокобезопасный
-       /* authService = new SimpleAuthService();*/
+        /* authService = new SimpleAuthService();*/
 
 
         //проверка на соединение с базой данных
@@ -63,26 +63,27 @@ public class Server {
 
     //широковещательное сообщение, передача всем клиентам в листе
     public void broadcastMsg(ClientHandler sender, String msg) {
-        String message = String.format("%s : %s", sender.getNickname(), msg );
+        String message = String.format("%s : %s", sender.getNickname(), msg);
 
         for (ClientHandler c : clients) {
             c.sendMsg(message);
         }
     }
+
     //метод для отправки личных сообщений
     //входные переменные: отправитель, имя получателя, сообщение
-    public void indMsg(ClientHandler sender,String nickReceiver,  String msg) {
-        String message = String.format("%s -> %s: %s", sender.getNickname(),nickReceiver, msg);
+    public void indMsg(ClientHandler sender, String nickReceiver, String msg) {
+        String message = String.format("%s -> %s: %s", sender.getNickname(), nickReceiver, msg);
         for (ClientHandler c : clients) {
-           if (c.getNickname().equals(nickReceiver)){ //если имя клиента совпадает с имененм получателя, то отправляем
-               c.sendMsg(message);
-               if (sender.equals(c)){//если отправитель и имя получателя одинаковы, то выходим из цикла и не отправляем
-                   return;
-               }
-               sender.sendMsg(message);
-               return;
-           }
-             }
+            if (c.getNickname().equals(nickReceiver)) { //если имя клиента совпадает с имененм получателя, то отправляем
+                c.sendMsg(message);
+                if (sender.equals(c)) {//если отправитель и имя получателя одинаковы, то выходим из цикла и не отправляем
+                    return;
+                }
+                sender.sendMsg(message);
+                return;
+            }
+        }
         sender.sendMsg("Пользователь не найден: " + nickReceiver);
     }
 
@@ -97,20 +98,21 @@ public class Server {
         clients.remove(clientHandler);
         broadcastClientList();
     }
-    public AuthService getAuthService (){
+
+    public AuthService getAuthService() {
         return authService;
     }
 
-    public boolean isLoginAuthenticated (String login){
+    public boolean isLoginAuthenticated(String login) {
         for (ClientHandler c : clients) {
-            if (c.getLogin().equals(login)){
+            if (c.getLogin().equals(login)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void broadcastClientList () {
+    public void broadcastClientList() {
         StringBuilder sb = new StringBuilder("/clientlist");
         for (ClientHandler c : clients) {
             sb.append(" ").append(c.getNickname());
