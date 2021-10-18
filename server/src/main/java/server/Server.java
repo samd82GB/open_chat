@@ -22,14 +22,7 @@ public class Server {
 
     public Server() {
         clients = new CopyOnWriteArrayList<>(); //создаём новый лист клиентов потокобезопасный
-        /* authService = new SimpleAuthService();*/
 
-
-        //проверка на соединение с базой данных
-        if (!SQLHandler.connect()) {
-            throw new RuntimeException("Не удалось подключиться к базе данных!");
-        }
-        // работа с пользователями через базу данных
         authService = new DBauthService();
 
 
@@ -47,7 +40,6 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            SQLHandler.disconnect();      //закрываем соединение с базой данных
             try {
                 socket.close();
             } catch (IOException e) {
