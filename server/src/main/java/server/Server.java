@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.*;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -18,9 +19,13 @@ public class Server {
     private List<ClientHandler> clients;
     private AuthService authService;
 
+
     public Server() {
         clients = new CopyOnWriteArrayList<>(); //создаём новый лист клиентов потокобезопасный
-        authService = new SimpleAuthService();
+
+        authService = new DBauthService();
+
+
         try {
             server = new ServerSocket(PORT);
             System.out.println("Сервер запустился");
@@ -50,41 +55,64 @@ public class Server {
 
     //широковещательное сообщение, передача всем клиентам в листе
     public void broadcastMsg(ClientHandler sender, String msg) {
-        String message = String.format("%s : %s", sender.getNickname(), msg );
+        String message = String.format("%s : %s", sender.getNickname(), msg);
 
         for (ClientHandler c : clients) {
             c.sendMsg(message);
         }
     }
+
     //метод для отправки личных сообщений
     //входные переменные: отправитель, имя получателя, сообщение
-    public void indMsg(ClientHandler sender,String nickReceiver,  String msg) {
-        String message = String.format("%s -> %s: %s", sender.getNickname(),nickReceiver, msg);
+    public void indMsg(ClientHandler sender, String nickReceiver, String msg) {
+        String message = String.format("%s -> %s: %s", sender.getNickname(), nickReceiver, msg);
         for (ClientHandler c : clients) {
-           if (c.getNickname().equals(nickReceiver)){ //если имя клиента совпадает с имененм получателя, то отправляем
-               c.sendMsg(message);
-               if (sender.equals(c)){//если отправитель и имя получателя одинаковы, то выходим из цикла и не отправляем
-                   return;
-               }
-               sender.sendMsg(message);
-               return;
-           }
-             }
+            if (c.getNickname().equals(nickReceiver)) { //если имя клиента совпадает с имененм получателя, то отправляем
+                c.sendMsg(message);
+                if (sender.equals(c)) {//если отправитель и имя получателя одинаковы, то выходим из цикла и не отправляем
+                    return;
+                }
+                sender.sendMsg(message);
+                return;
+            }
+        }
         sender.sendMsg("Пользователь не найден: " + nickReceiver);
     }
 
     //метод добавления клиента в лист
     public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
+        broadcastClientList();
     }
 
     //метод удаления клиента из листа
     public void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
-
+        broadcastClientList();
     }
-    public AuthService getAuthService (){
+
+    public AuthService getAuthService() {
         return authService;
+    }
+
+    public boolean isLoginAuthenticated(String login) {
+        for (ClientHandler c : clients) {
+            if (c.getLogin().equals(login)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void broadcastClientList() {
+        StringBuilder sb = new StringBuilder("/clientlist");
+        for (ClientHandler c : clients) {
+            sb.append(" ").append(c.getNickname());
+        }
+        String msg = sb.toString();
+        for (ClientHandler c : clients) {
+            c.sendMsg(msg);
+        }
     }
 }
 
