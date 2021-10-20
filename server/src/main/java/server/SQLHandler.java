@@ -19,7 +19,7 @@ public class SQLHandler {
             }
             rs.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         } finally {
             DatabaseConnection.close(connection);
         }

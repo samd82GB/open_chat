@@ -19,9 +19,11 @@ import javafx.stage.StageStyle;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -52,6 +54,9 @@ public class Controller implements Initializable {
     private Stage stage;
     private Stage regStage;
     private RegController regController;
+
+    private File file;
+
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
@@ -98,9 +103,11 @@ public class Controller implements Initializable {
 
             new Thread(() -> {
                 try {
+
                     //цикл авторизации
                     while (true) {
                         String str = in.readUTF();
+
                         if (str.startsWith("/")) {
                             if (str.equals("/end")) {
                                 System.out.println("Клиент: " + socket.getLocalSocketAddress() + "   отключился");
@@ -109,6 +116,24 @@ public class Controller implements Initializable {
                             if (str.startsWith("/auth_ok")) {
                                 nickname = str.split("\\s+")[1];
                                 setAuthenticated(true);
+
+                                file = new File ("client/src/main/resources/history_"+nickname);
+                                if (file.createNewFile()) {
+                                    System.out.println("Создан файл истории пользователя "+nickname);
+                                }
+                                //тут добавляем последние 100 записей в окно пользователя из файла
+                                //получаем лист записей из файла
+
+                                History history = new History(file);
+                                ArrayList <String> list = history.read100LinesFromFile();
+                                int startIndex;
+                                if (list.size()<=100) {
+                                    startIndex = 0;
+                                } else startIndex = list.size() - 100;
+                                //отправляем 100 последних записей в текстовое поле пользователя
+                                for (int i=startIndex; i< list.size(); i++ ) {
+                                    textArea.appendText(list.get(i) + "\n");
+                                }
                                 break;
                             }
                             if (str.startsWith("/reg_ok")) {
@@ -119,12 +144,15 @@ public class Controller implements Initializable {
                             }
                         } else {
                             textArea.appendText(str + "\n");
+
                         }
                     }
 
                     //цикл работы
                     while (authenticated) {
                         String str = in.readUTF();
+                        History history = new History(file);
+
                         if (str.startsWith("/")) {
                             if (str.equals("/end")) {
                                 break;
@@ -149,6 +177,7 @@ public class Controller implements Initializable {
 
                         } else {
                             textArea.appendText(str + "\n");
+                            history.writeToFile(str);
                         }
 
                     }
