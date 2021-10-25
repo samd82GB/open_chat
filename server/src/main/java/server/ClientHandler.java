@@ -5,8 +5,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
+
     private Server server;
     private Socket socket;
     private DataInputStream in;
@@ -21,7 +24,11 @@ public class ClientHandler {
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
-            new Thread(() -> {
+            //Испльзование пула потоков
+            ExecutorService singleService = Executors.newSingleThreadExecutor();
+            singleService.execute(() -> {
+
+            //new Thread(() -> {
                 try {
                     //устанавливаем время контроля бездействия сокета на 120 секунд
                     socket.setSoTimeout(120000);
@@ -148,7 +155,8 @@ public class ClientHandler {
                         e.printStackTrace();
                     }
                 }
-            }).start();
+            });
+            singleService.shutdown();
 
         } catch (IOException e) {
             e.printStackTrace();
